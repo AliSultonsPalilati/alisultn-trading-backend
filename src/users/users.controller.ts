@@ -1,7 +1,21 @@
-import { Controller, Post, Body, Get, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+
+interface RequestWithUser extends Request {
+  user: {
+    sub: number;
+    email: string;
+  };
+}
 
 @Controller('users')
 export class UsersController {
@@ -14,7 +28,7 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  async getProfile(@Request() req) {
+  async getProfile(@Request() req: RequestWithUser) {
     return this.usersService.findById(req.user.sub);
   }
 }

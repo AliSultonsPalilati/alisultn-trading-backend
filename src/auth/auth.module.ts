@@ -12,8 +12,10 @@ import { JwtStrategy } from './jwt.strategy';
       useFactory: (configService: ConfigService): JwtModuleOptions => {
         const expiresIn = configService.get<string>('JWT_EXPIRES_IN') || '7d';
         return {
-          secret: configService.get<string>('JWT_SECRET') || 'default-secret-key',
+          secret:
+            configService.get<string>('JWT_SECRET') || 'default-secret-key',
           signOptions: {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             expiresIn: expiresIn as any,
           },
         };
