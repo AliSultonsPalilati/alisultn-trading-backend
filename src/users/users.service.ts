@@ -1,56 +1,56 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { PrismaService } from '../prisma.service';
+import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class UsersService {
-  // Pastikan URL database terbaca dengan aman dari .env
-  private prisma = new PrismaClient({
-    datasources: {
-      db: {
-        url: process.env.POSTGRES_URL!,
-      },
-    },
-  });
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService,
+  ) {}
 
-  // Inject JwtService ke dalam constructor
-  constructor(private readonly jwtService: JwtService) {}
-
-  async login(email: string, pass: string) {
-    // 1. Cari user untuk ambil password (verifikasi)
-    const userWithPassword = await this.prisma.user.findUnique({
-      where: { email },
+  async login(dto: LoginDto) {
+    // Cari user berdasarkan email
+    const user = await this.prisma.user.findUnique({
+      where: { email: dto.email },
     });
 
-    if (!userWithPassword) {
-      throw new UnauthorizedException('User tidak ditemukan');
+    if (!user) {
+      throw new UnauthorizedException('Email atau password salah');
     }
 
-    // 2. Bandingkan password input dengan hash di database
-    const isMatch = await bcrypt.compare(pass, userWithPassword.password);
+    // Verifikasi password
+    const isPasswordValid = await bcrypt.compare(dto.password, user.password);
 
-    if (!isMatch) {
-      throw new UnauthorizedException('Password salah');
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Email atau password salah');
     }
 
-    // 3. Ambil data user tanpa password
-    const user = await this.prisma.user.findUnique({
-      where: { email },
+    // Buat token
+    const payload = { sub: user.id, email: user.email };
+    const access_token = await this.jwtService.signAsync(payload);
+
+    return {
+      message: 'Login berhasil',
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      },
+      access_token,
+    };
+  }
+
+  async findById(id: number) {
+    return this.prisma.user.findUnique({
+      where: { id },
       select: {
         id: true,
         email: true,
         name: true,
       },
     });
-
-    // 4. Buat Payload untuk Token
-    const payload = { sub: user?.id, email: user?.email };
-
-    // 5. Kembalikan data user beserta Access Token
-    return {
-      user: user,
-      access_token: await this.jwtService.signAsync(payload),
-    };
   }
 }

@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = "postgresql://postgres.nmxqnqaqpllimswlauzm:fsAQClLshfTLUaie@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres"
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -12,6 +13,8 @@ model User {
   email      String     @unique
   password   String
   name       String?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
   journals   Journal[]
   strategies Strategy[]
 }
@@ -25,8 +28,9 @@ model Journal {
   imageUrl  String?
   notes     String?
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   userId    Int
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Strategy {
@@ -41,8 +45,9 @@ model Strategy {
   ipoStatus   String?
   status      String           @default("ACTIVE")
   createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
   userId      Int
-  user        User             @relation(fields: [userId], references: [id])
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 enum StrategyCategory {
