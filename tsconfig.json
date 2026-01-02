@@ -2,7 +2,6 @@
   "compilerOptions": {
     "module": "nodenext",
     "moduleResolution": "nodenext",
-    "ignoreDeprecations": "5.0", // <--- Ubah ini menjadi "5.0"
     "resolvePackageJsonExports": true,
     "esModuleInterop": true,
     "isolatedModules": true,
