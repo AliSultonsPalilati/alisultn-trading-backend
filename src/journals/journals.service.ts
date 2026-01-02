@@ -6,19 +6,28 @@ import { CreateJournalDto } from './dto/create-journal.dto';
 export class JournalsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(userId: string, dto: CreateJournalDto) {
+  async create(userId: number, dto: CreateJournalDto) {
     return await this.prisma.journal.create({
       data: {
-        ...dto,
-        userId: Number(userId), // Konversi String ke Number
+        ticker: dto.ticker,
+        type: dto.type,
+        price: dto.price,
+        lots: dto.lots,
+        notes: dto.notes,
+        imageUrl: dto.imageUrl,
+        userId: userId, // Langsung gunakan userId karena sudah berbentuk number
       },
     });
   }
 
-  async findAll(userId: string) {
+  async findAll(userId: number) {
     return await this.prisma.journal.findMany({
-      where: { userId: Number(userId) },
-      orderBy: { createdAt: 'desc' },
+      where: {
+        userId: userId,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
   }
 }

@@ -18,6 +18,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!payload.sub) {
       throw new UnauthorizedException('Token tidak valid');
     }
-    return { sub: payload.sub, email: payload.email };
+    // PERBAIKAN: Ubah 'sub' menjadi 'id' agar sesuai dengan panggilan di Controller
+    return { id: payload.sub, email: payload.email };
   }
 }
