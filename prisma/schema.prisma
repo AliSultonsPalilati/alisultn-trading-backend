@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://postgres.nmxqnqaqpllimswlauzm:fsAQClLshfTLUaie@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres"
+}
+
+model User {
+  id         Int        @id @default(autoincrement())
+  email      String     @unique
+  password   String
+  name       String?
+  journals   Journal[]
+  strategies Strategy[]
+}
+
+model Journal {
+  id        Int      @id @default(autoincrement())
+  ticker    String
+  type      String
+  price     Float
+  lots      Int
+  imageUrl  String?
+  notes     String?
+  createdAt DateTime @default(now())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Strategy {
+  id          Int              @id @default(autoincrement())
+  category    StrategyCategory
+  ticker      String
+  reason      String?
+  targetPrice Float?
+  stopLoss    Float?
+  ipoPrice    Float?
+  ipoLots     Int?
+  ipoStatus   String?
+  status      String           @default("ACTIVE")
+  createdAt   DateTime         @default(now())
+  userId      Int
+  user        User             @relation(fields: [userId], references: [id])
+}
+
+enum StrategyCategory {
+  SCALPING
+  SWING
+  IPO
+}
